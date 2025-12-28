@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import { Canvas, useLoader } from '@react-three/fiber';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFLoader } from 'three-stdlib';
 import {
   OrbitControls,
   PerspectiveCamera,
