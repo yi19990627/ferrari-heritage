@@ -48,7 +48,7 @@ function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   // 初始化 Supabase
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -88,7 +88,7 @@ function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
     <div className="fixed inset-0 z-[9999] flex bg-black/40 backdrop-blur-sm">
       <div className="w-[40vw] h-full bg-[#FFD300] p-[5vw] flex flex-col justify-center relative shadow-[20px_0_50px_rgba(0,0,0,0.3)]">
         <button onClick={onClose} className="absolute top-10 right-10 text-black text-[2vw]">✕</button>
-        
+
         <div className="mb-[4vh]">
           <h2 className="text-[5vw] font-black italic tracking-tighter text-black leading-[0.9] uppercase">Join the <br /> Scuderia</h2>
         </div>
@@ -97,29 +97,29 @@ function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
         <form className="space-y-[3vh]" onSubmit={handleSignUp}>
           <div className="flex flex-col space-y-2 text-black">
             <label className="text-[0.8vw] font-black uppercase">Email Address</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10" 
-              placeholder="DRIVER@MARANELLO.IT" 
+              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10"
+              placeholder="DRIVER@MARANELLO.IT"
             />
           </div>
           <div className="flex flex-col space-y-2 text-black">
             <label className="text-[0.8vw] font-black uppercase">Password</label>
-            <input 
-              type="password" 
+            <input
+              type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10" 
-              placeholder="••••••••" 
+              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10"
+              placeholder="••••••••"
             />
           </div>
-          
+
           {/* 確保按鈕類型是 submit */}
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="w-full bg-black text-[#FFD300] py-6 text-[1.2vw] font-black tracking-[0.8em] mt-10 hover:bg-white hover:text-black transition-all uppercase disabled:opacity-50"
@@ -182,7 +182,7 @@ export default function Home() {
 
   return (
     <main className="flex h-screen w-screen bg-black overflow-hidden font-archivo italic font-black text-[#FFD300]">
-      
+
 
       {/* 左側 展示區 */}
       <div className="relative w-[72vw] h-screen bg-black">
@@ -276,6 +276,12 @@ export default function Home() {
       </aside>
 
       <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+        const handleSignUp = async (e: React.FormEvent) => {
+        e.preventDefault();
+      alert("按鈕觸發成功！"); // 加入這行最原始的彈窗
+      console.log("🚀 按鈕觸發成功");
+  // ...其餘代碼
+}
 
     </main>
   );
