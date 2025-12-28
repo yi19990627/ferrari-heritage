@@ -115,20 +115,40 @@ function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
 function FerrariModel({ modelType, color }: { modelType: 'F40' | 'F50'; color: string }) {
   const config = CAR_DATA[modelType];
   const gltf = useLoader(GLTFLoader, config.modelPath);
+
   const scene = useMemo(() => {
     const cloned = gltf.scene.clone();
     cloned.scale.set(config.fixedScale, config.fixedScale, config.fixedScale);
     return cloned;
-  }, [gltf, modelType, config.fixedScale]);
+  }, [gltf, config.fixedScale]);
 
   useEffect(() => {
     scene.traverse((child: any) => {
       if (child.isMesh && child.material) {
-        const isBody = modelType === 'F40' ? config.bodyParts.includes(child.name) : child.name.includes(config.bodyId);
-        if (isBody) child.material = new THREE.MeshPhysicalMaterial({ color: new THREE.Color(color), metalness: 0.2, roughness: 0.1, clearcoat: 1.0 });
+        // --- 修正後的邏輯：分開處理 F40 與 F50 的顏色套用 ---
+        let isBody = false;
+        if (modelType === 'F40') {
+          // 這裡強制告訴 TS 這是 F40 的資料結構
+          const f40Config = CAR_DATA.F40;
+          isBody = f40Config.bodyParts.includes(child.name);
+        } else {
+          // 這裡處理 F50
+          const f50Config = CAR_DATA.F50;
+          isBody = child.name.includes(f50Config.bodyId);
+        }
+
+        if (isBody) {
+          child.material = new THREE.MeshPhysicalMaterial({
+            color: new THREE.Color(color),
+            metalness: 0.2,
+            roughness: 0.1,
+            clearcoat: 1.0
+          });
+        }
       }
     });
-  }, [scene, color, modelType, config]);
+  }, [scene, color, modelType]);
+
   return <primitive object={scene} />;
 }
 
