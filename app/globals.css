@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { background: #000; }
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 防止出現全頁捲軸 */
+  background-color: black;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { display: none; }
+
+.custom-scrollbar::-webkit-scrollbar { 
+  display: block; 
+  width: 4px; /* 極細滾動條 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb { 
+  background: #FFD300; 
+  border-radius: 2px;
+}
