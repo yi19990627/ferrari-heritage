@@ -249,9 +249,6 @@ export default function Home() {
           Register to Inquire
         </button>
       </aside>
-
-      {/* 註冊彈窗 */}
-      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
     </main>
   );
 }
