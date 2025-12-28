@@ -40,74 +40,57 @@ const FFERRARI_COLORS = [
 ];
 
 // --- 註冊彈窗 ---
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
 function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const supabase = createClientComponentClient();
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${location.origin}/auth/callback` },
+    });
+
+    if (error) {
+      alert("註冊失敗: " + error.message);
+    } else {
+      alert("請檢查您的信箱以驗證帳號！");
+      onClose();
+    }
+    setLoading(false);
+  };
+
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex bg-black/40 backdrop-blur-sm transition-all">
-      {/* 左側完整側邊欄 - 佔據 40% 寬度 */}
-      <div className="w-[40vw] h-full bg-[#FFD300] p-[5vw] flex flex-col justify-center relative shadow-[20px_0_50px_rgba(0,0,0,0.3)] animate-in slide-in-from-left duration-500">
-
-        {/* 關閉按鈕 */}
-        <button
-          onClick={onClose}
-          className="absolute top-10 right-10 text-black text-[2vw] font-light hover:rotate-90 transition-transform duration-300"
-        >
-          ✕
-        </button>
-
-        {/* 標題區：字體大幅度放大 */}
-        <div className="mb-[4vh]">
-          <h2 className="text-[5vw] font-black italic tracking-tighter text-black leading-[0.9] uppercase">
-            Join the <br /> Scuderia
-          </h2>
-          <p className="text-[1vw] text-black font-bold tracking-[0.3em] uppercase mt-4 opacity-70">
-            Create your profile to save configurations
-          </p>
-        </div>
-
-        {/* 表單區：放大 Input 與 Label */}
-        <form className="space-y-[3vh]" onSubmit={(e) => e.preventDefault()}>
-          <div className="flex flex-col space-y-2">
-            <label className="text-[0.8vw] font-black uppercase text-black">Username</label>
-            <input
-              type="text"
-              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] text-black font-black placeholder:text-black/10"
-              placeholder="ENZO_1987"
-            />
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label className="text-[0.8vw] font-black uppercase text-black">Email Address</label>
-            <input
-              type="email"
-              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] text-black font-black placeholder:text-black/10"
-              placeholder="DRIVER@MARANELLO.IT"
-            />
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label className="text-[0.8vw] font-black uppercase text-black">Password</label>
-            <input
-              type="password"
-              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] text-black font-black placeholder:text-black/10"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {/* 註冊按鈕：更粗更寬 */}
-          <button className="w-full bg-black text-[#FFD300] py-6 text-[1.2vw] font-black tracking-[0.8em] mt-10 hover:bg-white hover:text-black transition-all uppercase shadow-xl active:scale-95">
-            Register Now
-          </button>
-        </form>
-
-        <p className="mt-[5vh] text-[0.9vw] text-black font-black">
-          ALREADY A MEMBER? <span className="underline cursor-pointer hover:opacity-60 transition-opacity">LOG IN TO YOUR GARAGE</span>
-        </p>
-      </div>
-
-      {/* 右側空白區：點擊也可關閉 */}
-      <div className="flex-grow h-full" onClick={onClose}></div>
-    </div>
+    // ... 原有的 UI 結構 ...
+    <form className="space-y-[3vh]" onSubmit={handleSignUp}>
+      <input 
+        type="email" 
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="..." // 使用你原本的大字體樣式
+        placeholder="DRIVER@MARANELLO.IT" 
+        required
+      />
+      <input 
+        type="password" 
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="..." 
+        placeholder="••••••••" 
+        required
+      />
+      <button disabled={loading} className="...">
+        {loading ? 'PROCESSING...' : 'Register Now'}
+      </button>
+    </form>
   );
 }
 
