@@ -40,6 +40,8 @@ const FFERRARI_COLORS = [
   { name: 'NERO DS', hex: '#111111' }
 ];
 
+const supabase = createClientComponentClient();
+
 // --- 註冊彈窗 ---
 
 function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -48,7 +50,6 @@ function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   const [loading, setLoading] = useState(false);
   
   // 初始化 Supabase
-  const supabase = createClientComponentClient();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +85,7 @@ function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex bg-black/40 backdrop-blur-sm">
       <div className="w-[40vw] h-full bg-[#FFD300] p-[5vw] flex flex-col justify-center relative shadow-[20px_0_50px_rgba(0,0,0,0.3)]">
         <button onClick={onClose} className="absolute top-10 right-10 text-black text-[2vw]">✕</button>
         
@@ -178,11 +179,10 @@ export default function Home() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [currentModel, setCurrentModel] = useState<'F40' | 'F50'>('F40');
   const [selectedColor, setSelectedColor] = useState(FFERRARI_COLORS[1]);
-  const supabase = createClientComponentClient();
 
   return (
     <main className="flex h-screen w-screen bg-black overflow-hidden font-archivo italic font-black text-[#FFD300]">
-      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+      
 
       {/* 左側 展示區 */}
       <div className="relative w-[72vw] h-screen bg-black">
@@ -274,6 +274,9 @@ export default function Home() {
           Register to Inquire
         </button>
       </aside>
+
+      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+
     </main>
   );
 }
