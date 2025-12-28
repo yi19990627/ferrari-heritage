@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import { Canvas, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three-stdlib';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import {
   OrbitControls,
   PerspectiveCamera,
@@ -40,57 +41,94 @@ const FFERRARI_COLORS = [
 ];
 
 // --- 註冊彈窗 ---
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // 初始化 Supabase
   const supabase = createClientComponentClient();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("🚀 註冊按鈕被點擊了！"); // 檢查按鈕有沒有反應
     setLoading(true);
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${location.origin}/auth/callback` },
-    });
 
-    if (error) {
-      alert("註冊失敗: " + error.message);
-    } else {
-      alert("請檢查您的信箱以驗證帳號！");
-      onClose();
+    try {
+      console.log("📡 正在發送資料到 Supabase...", { email });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          // 這是註冊後要跳回的頁面，確保 Vercel 能運作
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        console.error("❌ Supabase 報錯:", error.message);
+        alert("註冊出錯: " + error.message);
+      } else {
+        console.log("✅ 註冊成功！請檢查信箱", data);
+        alert("註冊成功！請至信箱收取驗證信。");
+        onClose();
+      }
+    } catch (err) {
+      console.error("💥 程式執行發生意外錯誤:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (!isOpen) return null;
+
   return (
-    // ... 原有的 UI 結構 ...
-    <form className="space-y-[3vh]" onSubmit={handleSignUp}>
-      <input 
-        type="email" 
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="..." // 使用你原本的大字體樣式
-        placeholder="DRIVER@MARANELLO.IT" 
-        required
-      />
-      <input 
-        type="password" 
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="..." 
-        placeholder="••••••••" 
-        required
-      />
-      <button disabled={loading} className="...">
-        {loading ? 'PROCESSING...' : 'Register Now'}
-      </button>
-    </form>
+    <div className="fixed inset-0 z-[100] flex bg-black/40 backdrop-blur-sm">
+      <div className="w-[40vw] h-full bg-[#FFD300] p-[5vw] flex flex-col justify-center relative shadow-[20px_0_50px_rgba(0,0,0,0.3)]">
+        <button onClick={onClose} className="absolute top-10 right-10 text-black text-[2vw]">✕</button>
+        
+        <div className="mb-[4vh]">
+          <h2 className="text-[5vw] font-black italic tracking-tighter text-black leading-[0.9] uppercase">Join the <br /> Scuderia</h2>
+        </div>
+
+        {/* 確保 onSubmit 有綁定 handleSignUp */}
+        <form className="space-y-[3vh]" onSubmit={handleSignUp}>
+          <div className="flex flex-col space-y-2 text-black">
+            <label className="text-[0.8vw] font-black uppercase">Email Address</label>
+            <input 
+              type="email" 
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10" 
+              placeholder="DRIVER@MARANELLO.IT" 
+            />
+          </div>
+          <div className="flex flex-col space-y-2 text-black">
+            <label className="text-[0.8vw] font-black uppercase">Password</label>
+            <input 
+              type="password" 
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10" 
+              placeholder="••••••••" 
+            />
+          </div>
+          
+          {/* 確保按鈕類型是 submit */}
+          <button 
+            type="submit"
+            disabled={loading}
+            className="w-full bg-black text-[#FFD300] py-6 text-[1.2vw] font-black tracking-[0.8em] mt-10 hover:bg-white hover:text-black transition-all uppercase disabled:opacity-50"
+          >
+            {loading ? 'SENDING...' : 'Register Now'}
+          </button>
+        </form>
+      </div>
+      <div className="flex-grow h-full" onClick={onClose}></div>
+    </div>
   );
 }
 
@@ -140,6 +178,7 @@ export default function Home() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [currentModel, setCurrentModel] = useState<'F40' | 'F50'>('F40');
   const [selectedColor, setSelectedColor] = useState(FFERRARI_COLORS[1]);
+  const supabase = createClientComponentClient();
 
   return (
     <main className="flex h-screen w-screen bg-black overflow-hidden font-archivo italic font-black text-[#FFD300]">
