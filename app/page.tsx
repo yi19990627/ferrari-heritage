@@ -28,201 +28,186 @@ const CAR_DATA = {
     fullName: "Ferrari F50",
     year: "1995 - 1997",
     modelPath: '/ferrari_f50.glb',
-    description: "核心技術源自 90 年代 F1 賽車，採用 4.7 升 V12 自然進氣引擎，真正實現公路上的 F1 體驗。",
+    description: "核心技術源自 90 年代 F1 賽車，採用 4.7 升 V12 自然進氣引擎。",
     specs: { Engine: '4.7L V12', Power: '520 CV', '0-100': '3.8s', 'Top': '325 km/h' },
-    bodyId: '58',
-    exclusion: ['wheel', 'tire', 'rim', 'hub'],
-    fixedScale: 300
+    bodyParts: ['body_red_0', 'wing_red_0'],
+    fixedScale: 3
+  },
+  ENZO: {
+    fullName: "Enzo Ferrari",
+    year: "2002 - 2004",
+    modelPath: '/ferrari_enzo.glb',
+    description: "以創辦人之名命名，展現了當時法拉利在 F1 的統治性技術成果。",
+    specs: { Engine: '6.0L V12', Power: '660 CV', '0-100': '3.6s', 'Top': '350 km/h' },
+    bodyParts: ['Object_4', 'Object_5', 'Object_31', 'Object_32'],
+    fixedScale: 0.05
+  },
+  LAFERRARI: {
+    fullName: "LaFerrari",
+    year: "2013 - 2016",
+    modelPath: '/laferrari.glb',
+    description: "首款搭載 HY-KERS 混合動力系統的旗艦跑車，開啟了電氣化新紀元。",
+    specs: { Engine: '6.3L V12 Hybrid', Power: '963 CV', '0-100': '< 3s', 'Top': '> 350 km/h' },
+    bodyParts: ['body_ext_0', 'door_l_ext_0', 'door_r_ext_0'],
+    fixedScale: 3
   }
 };
 
 const FFERRARI_COLORS = [
-  { name: 'ROSSO CORSA', hex: '#ff2800' },
+  { name: 'ROSSO CORSA', hex: '#FF0000' },
   { name: 'GIALLO MODENA', hex: '#FFD300' },
-  { name: 'BIANCO AVUS', hex: '#ffffff' },
-  { name: 'NERO DS', hex: '#111111' }
+  { name: 'BIANCO AVUS', hex: '#FFFFFF' },
+  { name: 'NERO DS', hex: '#000000' }
 ];
 
-// --- 註冊彈窗組件 ---
+// --- 3D 模型組件 ---
+function FerrariModel({ modelPath, color, bodyParts, scale }: { modelPath: string; color: string; bodyParts: string[]; scale: number }) {
+  const gltf = useLoader(GLTFLoader, modelPath);
+  const scene = useMemo(() => gltf.scene.clone(), [gltf]);
+
+  useEffect(() => {
+    scene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh && bodyParts.includes(child.name)) {
+        const mesh = child as THREE.Mesh;
+        mesh.material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(color),
+          metalness: 0.9,
+          roughness: 0.1,
+        });
+      }
+    });
+  }, [scene, color, bodyParts]);
+
+  return <primitive object={scene} scale={scale} position={[0, -1, 0]} />;
+}
+
+// --- 註冊 Modal 組件 ---
 function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    window.alert("偵測到點擊！開始嘗試註冊...");
-    alert("按鈕觸發成功！"); // 診斷用
-    console.log("🚀 註冊按鈕被點擊了！");
-    setLoading(true);
+    window.alert("偵測到註冊點擊！開始嘗試連線...");
 
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: window.location.origin,
         },
       });
 
       if (error) {
-        console.error("❌ Supabase 報錯:", error.message);
-        alert("註冊出錯: " + error.message);
+        window.alert("❌ 註冊失敗，原因是：" + error.message);
       } else {
-        console.log("✅ 註冊成功", data);
-        alert("註冊成功！請至信箱收取驗證信。");
+        window.alert("✅ 註冊成功！請去 Supabase 後台重新整理 Users 列表。");
         onClose();
       }
     } catch (err) {
-      console.error("💥 意外錯誤:", err);
-    } finally {
-      setLoading(false);
+      window.alert("💥 系統發生意外錯誤：" + err);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex bg-black/60 backdrop-blur-md">
-      <div className="w-[40vw] h-full bg-[#FFD300] p-[5vw] flex flex-col justify-center relative shadow-[20px_0_50px_rgba(0,0,0,0.5)]">
-        <button onClick={onClose} className="absolute top-10 right-10 text-black text-[2vw]">✕</button>
-        <div className="mb-[4vh]">
-          <h2 className="text-[5vw] font-black italic tracking-tighter text-black leading-[0.9] uppercase">Join the <br /> Scuderia</h2>
-        </div>
-        <form className="space-y-[3vh]" onSubmit={handleSignUp}>
-          <div className="flex flex-col space-y-2 text-black">
-            <label className="text-[0.8vw] font-black uppercase tracking-widest">Email Address</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10 uppercase"
-              placeholder="DRIVER@MARANELLO.IT"
-            />
-          </div>
-          <div className="flex flex-col space-y-2 text-black">
-            <label className="text-[0.8vw] font-black uppercase tracking-widest">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10"
-              placeholder="••••••••"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-black text-[#FFD300] py-6 text-[1.2vw] font-black tracking-[0.8em] mt-10 hover:bg-white hover:text-black transition-all uppercase disabled:opacity-50"
-          >
-            {loading ? 'SENDING...' : 'Register Now'}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl">
+      <div className="w-[30vw] border border-[#FFD300]/30 bg-black p-10 relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-[#FFD300] hover:scale-125">✕</button>
+        <h2 className="text-[2vw] font-black tracking-tighter mb-8 italic">JOIN SCUDERIA</h2>
+        <form onSubmit={handleSignUp} className="space-y-6">
+          <input
+            type="email"
+            placeholder="EMAIL ADDRESS"
+            className="w-full bg-transparent border-b border-[#FFD300]/30 py-3 text-white outline-none focus:border-[#FFD300]"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="PASSWORD (MIN 6 CHARACTERS)"
+            className="w-full bg-transparent border-b border-[#FFD300]/30 py-3 text-white outline-none focus:border-[#FFD300]"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit" className="w-full py-4 bg-[#FFD300] text-black font-bold hover:bg-white transition-all">
+            REGISTER NOW
           </button>
         </form>
       </div>
-      <div className="flex-grow h-full" onClick={onClose}></div>
     </div>
   );
 }
 
-// --- 模型組件 ---
-function FerrariModel({ modelType, color }: { modelType: 'F40' | 'F50'; color: string }) {
-  const config = CAR_DATA[modelType];
-  const gltf = useLoader(GLTFLoader, config.modelPath);
-  const scene = useMemo(() => {
-    const cloned = gltf.scene.clone();
-    cloned.scale.set(config.fixedScale, config.fixedScale, config.fixedScale);
-    return cloned;
-  }, [gltf, config.fixedScale]);
-
-  useEffect(() => {
-    scene.traverse((child: any) => {
-      if (child.isMesh && child.material) {
-        let isBody = false;
-        if (modelType === 'F40') {
-          isBody = CAR_DATA.F40.bodyParts.includes(child.name);
-        } else {
-          isBody = child.name.includes(CAR_DATA.F50.bodyId);
-        }
-        if (isBody) {
-          child.material = new THREE.MeshPhysicalMaterial({
-            color: new THREE.Color(color),
-            metalness: 0.2,
-            roughness: 0.1,
-            clearcoat: 1.0
-          });
-        }
-      }
-    });
-  }, [scene, color, modelType]);
-
-  return <primitive object={scene} />;
-}
-
-// --- 主頁面組件 ---
+// --- 主頁面 ---
 export default function Home() {
+  const [currentModel, setCurrentModel] = useState<keyof typeof CAR_DATA>('F40');
+  const [selectedColor, setSelectedColor] = useState(FFERRARI_COLORS[0]);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const [currentModel, setCurrentModel] = useState<'F40' | 'F50'>('F40');
-  const [selectedColor, setSelectedColor] = useState(FFERRARI_COLORS[1]); // 預設黃色
 
   return (
-    <main className="flex h-screen w-screen bg-black overflow-hidden font-archivo italic font-black text-[#FFD300]">
-      {/* 左側 展示區 */}
-      <div className="relative w-[72vw] h-screen bg-black">
-        <div className="absolute top-[4vh] right-[4vw] z-50">
-          <button
-            onClick={() => setIsRegisterOpen(true)}
-            className="px-8 py-3 bg-[#FFD300] text-black text-[0.7vw] font-black tracking-widest uppercase transition-all hover:bg-white"
-          >
-            Join Scuderia
-          </button>
+    <main className="h-screen w-screen bg-black text-white font-inter flex overflow-hidden">
+      {/* 左側資訊 */}
+      <section className="w-[35vw] p-16 flex flex-col justify-between z-10 bg-gradient-to-r from-black via-black/80 to-transparent">
+        <div>
+          <h1 className="text-[5vw] font-black leading-[0.85] italic tracking-tighter mb-4">
+            {CAR_DATA[currentModel].fullName}
+          </h1>
+          <p className="text-[#FFD300] text-[1.2vw] font-archivo mb-8 tracking-[0.3em]">
+            {CAR_DATA[currentModel].year}
+          </p>
+          <p className="text-[1.1vw] leading-relaxed opacity-70 font-light max-w-[25vw]">
+            {CAR_DATA[currentModel].description}
+          </p>
         </div>
 
-        <div className="absolute top-[4vh] left-[4vw] z-50">
-          <div className="w-[3.5vw] h-[5vw] bg-[#FFD300] flex items-center justify-center mb-1">
-            <span className="text-black text-[2.5vw] not-italic">🐎</span>
-          </div>
-          <span className="tracking-tighter leading-none text-[1.4vw] block">ICONA EXHIBIT</span>
-        </div>
-
-        <Canvas shadows>
-          <Suspense fallback={null}>
-            <PerspectiveCamera makeDefault position={[30, 15, 30]} fov={15} />
-            <Environment preset="night" />
-            <FerrariModel modelType={currentModel} color={selectedColor.hex} />
-            <OrbitControls enablePan={false} target={[0, 1, 0]} />
-          </Suspense>
-        </Canvas>
-
-        <div className="absolute top-[4vh] left-1/2 -translate-x-1/2 z-50 flex border border-[#FFD300]/30 bg-black/20 backdrop-blur-md">
-          {(['F40', 'F50'] as const).map((m) => (
+        <div className="flex flex-col gap-4">
+          {Object.keys(CAR_DATA).map((key) => (
             <button
-              key={m}
-              onClick={() => setCurrentModel(m)}
-              className={`px-12 py-3 text-[0.9vw] tracking-[0.2em] font-black text-black transition-all ${currentModel === m ? 'bg-[#FFD300]' : 'bg-[#FFD300]/40 hover:bg-[#FFD300]/60'}`}
+              key={key}
+              onClick={() => setCurrentModel(key as keyof typeof CAR_DATA)}
+              className={`text-left text-[1.5vw] font-black italic transition-all ${currentModel === key ? 'text-[#FFD300] translate-x-4' : 'text-white/20 hover:text-white'}`}
             >
-              {m}
+              {key}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* 右側 資訊欄 */}
-      <aside className="w-[28vw] h-screen bg-black flex flex-col p-[2.5vw] justify-start space-y-[3.5vh] border-l border-[#FFD300]/10">
-        <div className="space-y-0.5">
-          <span className="text-[1.1vw] border-b border-[#FFD300] pb-0.5 inline-block">{CAR_DATA[currentModel].year}</span>
-          <h2 className="text-[5.5vw] leading-none tracking-tighter uppercase">{currentModel}</h2>
-          <p className="text-[0.95vw] opacity-80 pt-1 not-italic font-medium text-white">{CAR_DATA[currentModel].description}</p>
-        </div>
+      {/* 中間 3D 畫布 */}
+      <section className="absolute inset-0 z-0">
+        <Canvas shadows dpr={[1, 2]}>
+          <PerspectiveCamera makeDefault position={[5, 2, 8]} fov={35} />
+          <OrbitControls enableZoom={false} maxPolarAngle={Math.PI / 2} minPolarAngle={Math.PI / 4} />
+          <Suspense fallback={null}>
+            <FerrariModel
+              modelPath={CAR_DATA[currentModel].modelPath}
+              color={selectedColor.hex}
+              bodyParts={CAR_DATA[currentModel].bodyParts}
+              scale={CAR_DATA[currentModel].fixedScale}
+            />
+            <Environment preset="city" />
+          </Suspense>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
+            <planeGeometry args={[100, 100]} />
+            <meshStandardMaterial color="#050505" />
+          </mesh>
+        </Canvas>
+      </section>
 
+      {/* 右側控制面板 */}
+      <aside className="w-[20vw] border-l border-white/5 p-12 flex flex-col gap-12 z-10 bg-black/40 backdrop-blur-sm">
         <div className="space-y-3">
           <h3 className="text-[0.65vw] tracking-[0.4em] opacity-40 uppercase">Technical Data</h3>
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
             {Object.entries(CAR_DATA[currentModel].specs).map(([k, v]) => (
               <div key={k} className="border-b border-[#FFD300]/10 pb-1">
                 <p className="text-[0.6vw] opacity-40 uppercase">{k}</p>
-                <p className="text-[1.6vw]">{v}</p>
+                <p className="text-[1.6vw]">{v as string}</p>
               </div>
             ))}
           </div>
@@ -250,6 +235,8 @@ export default function Home() {
           Register to Inquire
         </button>
       </aside>
+
+      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
     </main>
   );
 }
