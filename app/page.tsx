@@ -51,6 +51,7 @@ function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    window.alert("偵測到點擊！開始嘗試註冊...");
     alert("按鈕觸發成功！"); // 診斷用
     console.log("🚀 註冊按鈕被點擊了！");
     setLoading(true);
