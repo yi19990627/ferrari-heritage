@@ -50,19 +50,20 @@ export default function LoginPage() {
     return (
         <main className="min-h-screen w-screen bg-[#FFD300] flex flex-col items-center justify-center p-10 font-archivo italic font-black">
 
-            {/* 調整後的返回按鈕 */}
-            <div className="absolute top-10 left-10 z-50">
-                <Link
-                    href="/"
-                    className="group flex items-center gap-4 no-underline"
+            {/* 調整後的返回按鈕：預設與懸停皆為黃底黑字 */}
+            <div className="absolute top-10 left-[6vw] z-50"> 
+                <Link 
+                    href="/" 
+                    className="group flex items-center no-underline"
                 >
-                    <div className="w-[8vw] h-[3vw] bg-black text-[#FFD300] border-2 border-black flex items-center justify-center text-[0.8vw] tracking-[0.2em] uppercase font-bold hover:bg-transparent hover:text-black hover:scale-110 active:scale-95 transition-all duration-300 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:shadow-none">
+                    <div className="w-[8vw] h-[3vw] bg-[#FFD300] text-black border-2 border-black flex items-center justify-center text-[0.8vw] tracking-[0.2em] uppercase font-bold hover:scale-110 active:scale-95 transition-all duration-300 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-none">
                         ← Exit
                     </div>
                 </Link>
             </div>
 
             <div className="w-full max-w-[40vw]">
+                {/* 文字顏色改為深色以在黃色背景下更清晰 */}
                 <h1 className="text-[8vw] leading-[0.85] text-black uppercase mb-10 tracking-tighter">
                     {isLogin ? "Driver \n Login" : "Join the \n Scuderia"}
                 </h1>
