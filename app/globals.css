@@ -1,7 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* globals.css */
 
+/* 向上移動：從 0 移至自身高度的 -100% */
+@keyframes curtain-up {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+
+/* 向下移動：從 0 移至自身高度的 100% */
+@keyframes curtain-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+.animate-curtain-up {
+  /* 4秒時間，使用較平滑的貝茲曲線，確保結尾保持在開啟位置 */
+  animation: curtain-up 4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  will-change: transform;
+}
+
+.animate-curtain-down {
+  animation: curtain-down 4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  will-change: transform;
+}
+.animate-curtain-up, .animate-curtain-down {
+    will-change: transform; /* 告訴瀏覽器提前準備硬體加速 */
+}
 :root { background: #000; }
 
 body {

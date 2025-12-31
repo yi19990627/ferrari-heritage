@@ -3,12 +3,13 @@ import * as THREE from 'three';
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import { Canvas, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three-stdlib';
-import { createBrowserClient } from '@supabase/ssr'; // 修正：改用 SSR 套件以符合 Vercel 環境
+import { createBrowserClient } from '@supabase/ssr'; // 確保 Vercel 通過的正確引用
 import {
   OrbitControls,
   PerspectiveCamera,
   Environment
 } from '@react-three/drei';
+import Link from 'next/link';
 
 // --- 初始化 Supabase ---
 const supabase = createBrowserClient(
@@ -44,74 +45,6 @@ const FFERRARI_COLORS = [
   { name: 'NERO DS', hex: '#111111' }
 ];
 
-// --- 註冊彈窗 (恢復你原本的黃色滿版樣式) ---
-function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: window.location.origin },
-      });
-      if (error) window.alert("❌ 註冊失敗: " + error.message);
-      else {
-        window.alert("✅ 註冊成功！請檢查信箱驗證。");
-        onClose();
-      }
-    } catch (err) {
-      window.alert("💥 系統錯誤");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-[9999] flex bg-black/60 backdrop-blur-md">
-      <div className="w-[40vw] h-full bg-[#FFD300] p-[5vw] flex flex-col justify-center relative shadow-[20px_0_50px_rgba(0,0,0,0.5)]">
-        <button onClick={onClose} className="absolute top-10 right-10 text-black text-[2vw]">✕</button>
-        <div className="mb-[4vh]">
-          <h2 className="text-[5vw] font-black italic tracking-tighter text-black leading-[0.9] uppercase">Join the <br /> Scuderia</h2>
-        </div>
-        <form className="space-y-[3vh]" onSubmit={handleSignUp}>
-          <div className="flex flex-col space-y-2 text-black">
-            <label className="text-[0.8vw] font-black uppercase tracking-widest">Email Address</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10 uppercase"
-              placeholder="DRIVER@MARANELLO.IT"
-            />
-          </div>
-          <div className="flex flex-col space-y-2 text-black">
-            <label className="text-[0.8vw] font-black uppercase tracking-widest">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-transparent border-b-4 border-black py-4 outline-none text-[1.8vw] font-black placeholder:text-black/10"
-              placeholder="••••••••"
-            />
-          </div>
-          <button type="submit" className="w-full bg-black text-[#FFD300] py-6 text-[1.2vw] font-black tracking-[0.8em] mt-10 hover:bg-white hover:text-black transition-all uppercase">
-            {loading ? 'SENDING...' : 'Register Now'}
-          </button>
-        </form>
-      </div>
-      <div className="flex-grow h-full" onClick={onClose}></div>
-    </div>
-  );
-}
 
 // --- 模型渲染邏輯 ---
 function FerrariModel({ modelType, color }: { modelType: 'F40' | 'F50'; color: string }) {
@@ -129,7 +62,7 @@ function FerrariModel({ modelType, color }: { modelType: 'F40' | 'F50'; color: s
         let isBody = false;
         if (modelType === 'F40') isBody = (CAR_DATA.F40 as any).bodyParts.includes(child.name);
         else isBody = child.name.includes((CAR_DATA.F50 as any).bodyId);
-        
+
         if (isBody) {
           child.material = new THREE.MeshPhysicalMaterial({
             color: new THREE.Color(color),
@@ -145,22 +78,48 @@ function FerrariModel({ modelType, color }: { modelType: 'F40' | 'F50'; color: s
   return <primitive object={scene} />;
 }
 
-// --- 主頁面 (還原 72vw / 28vw 佈局) ---
+// --- 主頁面組件 ---
+// ... 前方 import 與 CAR_DATA 保持不變 ...
+
 export default function Home() {
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [currentModel, setCurrentModel] = useState<'F40' | 'F50'>('F40');
-  const [selectedColor, setSelectedColor] = useState(FFERRARI_COLORS[1]); // 預設黃色 (Giallo Modena)
+  const [selectedColor, setSelectedColor] = useState(FFERRARI_COLORS[1]);
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+  }, []);
 
   return (
     <main className="flex h-screen w-screen bg-black overflow-hidden font-archivo italic font-black text-[#FFD300]">
-      {/* 左側 展示區 */}
-      <div className="relative w-[72vw] h-screen bg-black">
-        <div className="absolute top-[4vh] right-[4vw] z-50">
-          <button onClick={() => setIsRegisterOpen(true)} className="px-8 py-3 bg-[#FFD300] text-black text-[0.7vw] font-black tracking-widest uppercase transition-all hover:bg-white">
-            Join Scuderia
-          </button>
+      {/* 左側 展示區 (72vw) */}
+      <div className="relative w-[72vw] h-full bg-black">
+
+        {/* --- 修正：登入狀態下的按鈕與登出連結 --- */}
+        <div className="absolute top-[4vh] right-[4vw] z-[100] flex flex-col items-end gap-2">
+          <Link href={session ? "/dashboard" : "/login"}>
+            <button className="px-8 py-3 bg-[#FFD300] text-black text-[0.8vw] font-black tracking-widest transition-all hover:bg-white hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,211,0,0.3)]">
+              {session ? "driver profile" : "login / join"}
+            </button>
+          </Link>
+
+          {/* 如果已登入，顯示小寫的登出按鈕 */}
+          {session && (
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.reload(); // 登出後重新整理頁面以更新狀態
+              }}
+              className="text-[0.7vw] text-[#FFD300] opacity-60 hover:opacity-100 transition-all lowercase italic border-b border-[#FFD300]/30"
+            >
+              sign out →
+            </button>
+          )}
         </div>
 
+        {/* 左上 Logo (保持不變) */}
         <div className="absolute top-[4vh] left-[4vw] z-50">
           <div className="w-[3.5vw] h-[5vw] bg-[#FFD300] flex items-center justify-center mb-1">
             <span className="text-black text-[2.5vw] not-italic">🐎</span>
@@ -168,6 +127,7 @@ export default function Home() {
           <span className="tracking-tighter leading-none text-[1.4vw] block">ICONA EXHIBIT</span>
         </div>
 
+        {/* --- 3D 渲染區域 --- */}
         <Canvas shadows>
           <Suspense fallback={null}>
             <PerspectiveCamera makeDefault position={[30, 15, 30]} fov={15} />
@@ -177,12 +137,16 @@ export default function Home() {
           </Suspense>
         </Canvas>
 
+        {/* 頂部型號切換 */}
         <div className="absolute top-[4vh] left-1/2 -translate-x-1/2 z-50 flex border border-[#FFD300]/30 bg-black/20 backdrop-blur-md">
           {(['F40', 'F50'] as const).map((m) => (
             <button
               key={m}
               onClick={() => setCurrentModel(m)}
-              className={`px-12 py-3 text-[0.9vw] tracking-[0.2em] font-black transition-all ${currentModel === m ? 'bg-[#FFD300] text-black' : 'text-[#FFD300] hover:bg-[#FFD300]/20'}`}
+              className={`px-12 py-3 text-[0.9vw] tracking-[0.2em] font-black transition-all ${currentModel === m
+                ? 'bg-[#FFD300] text-black' // 選中時：背景黃色，文字絕對黑色
+                : 'text-black hover:bg-[#FFD300]/20' // 未選中時：文字黃色
+                }`}
             >
               {m}
             </button>
@@ -190,47 +154,43 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 右側 資訊欄 */}
-      <aside className="w-[28vw] h-screen bg-black flex flex-col p-[2.5vw] justify-start space-y-[3.5vh] border-l border-[#FFD300]/10">
-        <div>
-          <span className="text-[1.1vw] border-b border-[#FFD300] pb-0.5 inline-block">{CAR_DATA[currentModel].year}</span>
-          <h2 className="text-[5.5vw] leading-none tracking-tighter uppercase">{currentModel}</h2>
-          <p className="text-[0.95vw] opacity-80 pt-1 not-italic font-medium text-white">{CAR_DATA[currentModel].description}</p>
-        </div>
+      {/* 右側 資訊欄 (保持原樣) */}
+      <aside className="w-[28vw] h-full bg-black flex flex-col p-[2.5vw] border-l border-[#FFD300]/10 overflow-y-auto custom-scrollbar">
+        <div className="flex flex-col space-y-[4vh]">
+          <div>
+            <span className="text-[1.1vw] border-b border-[#FFD300] pb-0.5 inline-block">{CAR_DATA[currentModel].year}</span>
+            <h2 className="text-[5.5vw] leading-none tracking-tighter uppercase">{currentModel}</h2>
+            <p className="text-[0.95vw] opacity-80 pt-1 not-italic font-medium text-white">{CAR_DATA[currentModel].description}</p>
+          </div>
 
-        <div className="space-y-3">
-          <h3 className="text-[0.65vw] tracking-[0.4em] opacity-40 uppercase">Technical Data</h3>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-            {Object.entries(CAR_DATA[currentModel].specs).map(([k, v]) => (
-              <div key={k} className="border-b border-[#FFD300]/10 pb-1">
-                <p className="text-[0.6vw] opacity-40 uppercase">{k}</p>
-                <p className="text-[1.6vw]">{v}</p>
-              </div>
-            ))}
+          <div className="space-y-3">
+            <h3 className="text-[0.65vw] tracking-[0.4em] opacity-40 uppercase">Technical Data</h3>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+              {Object.entries(CAR_DATA[currentModel].specs).map(([k, v]) => (
+                <div key={k} className="border-b border-[#FFD300]/10 pb-1">
+                  <p className="text-[0.6vw] opacity-40 uppercase">{k}</p>
+                  <p className="text-[1.6vw]">{v}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-[0.65vw] tracking-[0.3em] opacity-40 uppercase">Paint Selection</p>
+            <div className="flex gap-6">
+              {FFERRARI_COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  onClick={() => setSelectedColor(c)}
+                  className={`w-[2.5vw] h-[2.5vw] rounded-full border-[3px] transition-all ${selectedColor.name === c.name ? 'border-[#FFD300] scale-110' : 'border-[#FFD300]/40 opacity-60'}`}
+                  style={{ backgroundColor: c.hex }}
+                  title={c.name}
+                />
+              ))}
+            </div>
           </div>
         </div>
-
-        <div className="space-y-4">
-          <p className="text-[0.65vw] tracking-[0.3em] opacity-40 uppercase">Paint Selection</p>
-          <div className="flex gap-6">
-            {FFERRARI_COLORS.map((c) => (
-              <button
-                key={c.name}
-                onClick={() => setSelectedColor(c)}
-                className={`w-[2.5vw] h-[2.2vw] rounded-full border-[3px] transition-all ${selectedColor.name === c.name ? 'border-[#FFD300] scale-110' : 'border-[#FFD300]/40 opacity-60'}`}
-                style={{ backgroundColor: c.hex }}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex-grow" />
-        <button onClick={() => setIsRegisterOpen(true)} className="w-full py-5 bg-[#FFD300] text-black text-[0.9vw] font-black tracking-[1em] hover:bg-white transition-all uppercase">
-          Register to Inquire
-        </button>
       </aside>
-
-      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
     </main>
   );
 }
