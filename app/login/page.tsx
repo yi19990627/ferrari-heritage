@@ -49,10 +49,18 @@ export default function LoginPage() {
 
     return (
         <main className="min-h-screen w-screen bg-[#FFD300] flex flex-col items-center justify-center p-10 font-archivo italic font-black">
-            {/* 返回按鈕 */}
-            <Link href="/" className="absolute top-10 left-10 text-black text-[1vw] lowercase tracking-widest border-b-2 border-black hover:opacity-50 transition-all">
-                ← back to exhibit
-            </Link>
+
+            {/* 調整後的返回按鈕 */}
+            <div className="absolute top-10 left-10 z-50">
+                <Link
+                    href="/"
+                    className="group flex items-center gap-4 no-underline"
+                >
+                    <div className="w-[8vw] h-[3vw] bg-black text-[#FFD300] border-2 border-black flex items-center justify-center text-[0.8vw] tracking-[0.2em] uppercase font-bold hover:bg-transparent hover:text-black hover:scale-110 active:scale-95 transition-all duration-300 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:shadow-none">
+                        ← Exit
+                    </div>
+                </Link>
+            </div>
 
             <div className="w-full max-w-[40vw]">
                 <h1 className="text-[8vw] leading-[0.85] text-black uppercase mb-10 tracking-tighter">
