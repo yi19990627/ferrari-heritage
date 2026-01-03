@@ -124,7 +124,7 @@ export default function Home() {
           <div className="w-[3.5vw] h-[5vw] bg-[#FFD300] flex items-center justify-center mb-1">
             <span className="text-black text-[2.5vw] not-italic">🐎</span>
           </div>
-          <span className="tracking-tighter leading-none text-[1.4vw] block">ICONA EXHIBIT</span>
+          <span className="tracking-tighter leading-none text-[1.4vw] block">Tifosi club</span>
         </div>
 
         {/* --- 3D 渲染區域 --- */}

@@ -17,14 +17,30 @@ export default function Dashboard() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    const CAR_DATA: Record<string, { id: string; desc: string; year: number }> = {
+    const CAR_DATA: Record<string, { id: string; desc: string; year: number; trends?: { yr: string; val: string; highlight?: boolean }[] }> = {
         'LaFerrari': { id: 'iRsV6YpLsKA', year: 2013, desc: 'Ferrari 首款採用混合動力技術的頂尖超跑，象徵著品牌的技術巔峰。' },
         'LaFerrari Aperta': { id: 'OmLlfGJ2Vww', year: 2016, desc: 'LaFerrari 的敞篷版本，完美結合極致性能與開篷駕駛的純粹感。' },
-        'Ferrari F80': { id: 'tYSo0LsHhvo', year: 2024, desc: '新世代旗艦超跑，搭載 V6 油電系統與賽道級空氣動力學技術。' },
+        'Ferrari F80': {
+            id: 'tYSo0LsHhvo',
+            year: 2024,
+            desc: '"The Ferrari F80 marks the dawn of a new era in hypercar engineering, serving as the ultimate successor to the legendary LaFerrari. Redefining the very limits of speed, downforce, and driving emotion."',
+            trends: [
+                { yr: '24', val: '$3.9M', highlight: true } // F80 是新車，僅顯示上市價格
+            ]
+        },
         '812 Superfast': { id: '_fgOFAPtWRI', year: 2017, desc: '搭載 6.5 升 V12 自然進氣引擎，提供無與倫比的加速力與聲浪。' },
         'Portofino': { id: 'SiPiAMZwmkw', year: 2017, desc: '優雅的 2+ 硬頂敞篷跑車，兼具日常實用性與經典的 GT 風格。' },
         '488 Pista': { id: 'DS6Qe0tiIq8', year: 2018, desc: '賽道競技導向的極限車型，承襲了 Ferrari 488 GTE 的賽車基因。' },
-        '488 Pista Spider': { id: 'PaB6BhMunX8', year: 2018, desc: '全球性能最強悍的 Ferrari 敞篷跑車之一，讓賽道科技走入公路。' },
+        '488 Pista Spider': {
+            id: 'PaB6BhMunX8',
+            year: 2018,
+            desc: '"The 488 Pista Spider represents the pinnacle of Ferrari’s open-top performance, seamlessly transitioning track-bred dynamics to the infinite horizon."',
+            trends: [
+                { yr: '21', val: '$520K' },
+                { yr: '23', val: '$750K' },
+                { yr: '25', val: '$850K', highlight: true }
+            ]
+        },
         'Monza SP1 / SP2': { id: 'l9c6gYsgoME', year: 2018, desc: 'Icona 系列首作，向 1950 年代經典的 Barchetta 賽車致敬。' },
         'F8 Tributo': { id: 'y12f7NxFgkw', year: 2019, desc: '向 Ferrari 史上最強 V8 引擎致敬，展現極致的空氣動力效率。' },
         'F8 Spider': { id: '6LihAJmSg_4', year: 2019, desc: '結合獲獎無數的 V8 引擎與電動硬頂，在陽光下釋放速度。' },
@@ -35,7 +51,15 @@ export default function Dashboard() {
         'SF90 Spider': { id: 'ioqgCQBUDaY', year: 2020, desc: 'SF90 的敞篷版本，在 1000 匹馬力下享受無極限的駕駛樂趣。' },
         '296 GTB': { id: 'D7Zv2kSBagc', year: 2021, desc: '重新定義「駕駛樂趣」，展現 120 度 V6 引擎與電動馬達的完美融合。' },
         '812 Competizione': { id: '6VOg_ghFTJM', year: 2021, desc: 'V12 系列的終極性能版，專為尋求最純粹賽車靈魂的藏家打造。' },
-        'Daytona SP3': { id: 'MLUEcoyXvjE', year: 2021, desc: 'Icona 系列新作，融合 60 年代賽車美學與當代尖端動力。' },
+        'Daytona SP3': {
+            id: 'MLUEcoyXvjE',
+            year: 2021,
+            desc: '"A testament to Ferrari’s racing heritage, the Daytona SP3 blends the spirit of 1960s sports prototypes with modern V12 supremacy."',
+            trends: [
+                { yr: '22', val: '$2.2M' },
+                { yr: '25', val: '$3.5M', highlight: true }
+            ]
+        },
         'Purosangue': { id: 'Y0CPrFtwb4g', year: 2022, desc: 'Ferrari 史上首款四門四座車型，打破界限並保留品牌熱血靈魂。' },
         'Roma Spider': { id: '9HAJwfq_jVY', year: 2023, desc: '經典織物軟頂回歸，以現代科技詮釋意式美好生活。' },
         'SF90 XX Stradale': { id: '2xbg44TCiww', year: 2023, desc: '首款公路版 XX 車型，將法拉利賽道實驗計畫帶入一般街道。' },
@@ -83,10 +107,10 @@ export default function Dashboard() {
 
         const { error } = await supabase
             .from('cars')
-            .insert([{ 
-                owner_id: user.id, 
-                model_name: selectedCar, 
-                is_public: true 
+            .insert([{
+                owner_id: user.id,
+                model_name: selectedCar,
+                is_public: true
             }]);
 
         if (!error) {
@@ -103,10 +127,10 @@ export default function Dashboard() {
 
     return (
         <main className="flex h-screen w-screen bg-black overflow-hidden font-archivo italic font-black text-[#FFD300]">
-            
+
             {/* 左側 展示區 */}
             <div className="relative w-[72vw] h-full bg-black flex flex-col pt-[3vw] px-[4vw]">
-                <h1 className="text-[1.1vw] font-black leading-none tracking-[0.5em] opacity-60 uppercase">Personal Profile</h1>
+                <h1 className="text-[1.1vw] font-black leading-none tracking-[0.5em] opacity-60">Personal Profile</h1>
                 <div className="flex-1 flex flex-col justify-center">
                     <div className="w-full max-w-[50vw] mx-auto">
                         <div className="relative w-full aspect-[16/9] bg-black overflow-hidden hover:-translate-y-2 transition-transform duration-700 ease-out border border-[#FFD300]/10 shadow-[0_0_50px_rgba(255,211,0,0.05)]">
@@ -124,109 +148,91 @@ export default function Dashboard() {
             </div>
 
             {/* 右側 資訊欄 */}
-            <aside className="w-[28vw] h-full bg-black flex flex-col p-[2.5vw] border-l border-[#FFD300]/10">
-                
-                <div className="flex justify-between items-start mb-16 w-full">
-                    <Link 
-                        href="/" 
-                        className="w-[10vw] h-[3.5vw] bg-transparent border-2 border-[#FFD300] text-[#FFD300] no-underline hover:no-underline text-[0.85vw] tracking-[0.2em] uppercase font-bold hover:bg-[#FFD300] hover:text-black hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center text-center"
+            <aside className="w-[28vw] h-full bg-black flex flex-col p-[2.5vw] border-l border-[#FFD300]/10 overflow-y-auto custom-scrollbar">
+
+                {/* 1. 按鈕區：解決文字消失、移除大寫、字體統一、確保語法相容 */}
+                <div className="flex justify-between items-start mb-12 w-full shrink-0">
+                    {/* Back 按鈕 */}
+                    <Link
+                        href="/"
+                        className="w-[10vw] h-[3.5vw] bg-transparent border-2 border-[#FFD300] text-[#FFD300] text-[0.85vw] tracking-[0.2em] font-bold transition-all duration-300 flex items-center justify-center no-underline italic hover:bg-[#FFD300] hover:text-black"
                     >
-                        回到主選單
+                        back
                     </Link>
 
                     <div className="flex flex-col items-end gap-3">
-                        <button 
-                            onClick={handleLogout} 
-                            className="w-[10vw] h-[3.5vw] bg-transparent border-2 border-[#FFD300] text-[#FFD300] text-[0.85vw] tracking-[0.2em] uppercase font-bold hover:bg-[#FFD300] hover:text-black hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center"
+                        {/* Log out 按鈕：移除 uppercase，加入 italic 與 hover:text-black */}
+                        <button
+                            onClick={handleLogout}
+                            className="w-[10vw] h-[3.5vw] bg-transparent border-2 border-[#FFD300] text-[#FFD300] text-[0.85vw] tracking-[0.2em] font-bold transition-all duration-300 flex items-center justify-center italic hover:bg-[#FFD300] hover:text-black"
                         >
-                            登出
+                            log out
                         </button>
-                        <p className="text-[0.6vw] text-white/20 lowercase tracking-[0.3em] italic pr-1">{user.email}</p>
+                        {/* 使用者 Email */}
+                        <p className="text-[0.6vw] text-[#FFD300] opacity-40 lowercase tracking-[0.3em] italic pr-1">
+                            {user.email}
+                        </p>
                     </div>
                 </div>
 
-                <div className="space-y-8 flex-1 flex flex-col">
+                <div className="space-y-12 flex-1 flex flex-col">
+                    {/* 2. 車輛資訊：移除 Current Selection 標籤，並將趨勢圖上移 */}
                     <div>
-                        <span className="text-[0.8vw] border-b border-[#FFD300] pb-0.5 opacity-60 uppercase">Current Selection</span>
-                        <h2 className="text-[3vw] leading-none tracking-tighter mt-4 whitespace-nowrap overflow-hidden text-ellipsis uppercase">
+                        <h2 className="text-[3vw] leading-none tracking-tighter">
                             {selectedCar}
                         </h2>
 
-                        <div className="mt-6 h-[4vw] flex items-center">
-                            {ownedCars.includes(selectedCar) ? (
-                                <span className="text-[0.7vw] text-[#FFD300]/50 italic tracking-widest flex items-center gap-2">
-                                    <span className="text-[1.2vw]">✓</span> IN YOUR COLLECTION
-                                </span>
-                            ) : (
-                                <button
-                                    onClick={addToCollection}
-                                    className="px-8 py-3 bg-transparent border-2 border-[#FFD300] text-[#FFD300] text-[0.85vw] tracking-[0.2em] uppercase font-bold hover:bg-[#FFD300] hover:text-black hover:scale-110 active:scale-95 transition-all duration-300 italic"
-                                >
-                                    + 新增車輛
-                                </button>
-                            )}
-                        </div>
+                        {/* 3. 價格趨勢：上移並改為動態讀取 */}
+                        {CAR_DATA[selectedCar].trends && (
+                            <div className="mt-8 pt-8 border-t border-[#FFD300]/10">
+                                <span className="text-[0.8vw] border-b border-[#FFD300] pb-0.5 opacity-60">Value Trend</span>
+                                <div className="mt-6 space-y-4">
+                                    {CAR_DATA[selectedCar].trends.map((item) => (
+                                        <div key={item.yr} className="flex justify-between items-end">
+                                            <span className="text-[0.7vw] opacity-40">20{item.yr} Market Avg</span>
+                                            <span className={`text-[1.2vw] font-black ${item.highlight ? 'text-[#FFD300]' : 'text-[#FFD300]/40'}`}>
+                                                {item.val}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
-                        <div className="mt-8 pr-4">
+                        <div className="mt-8">
                             <p className="text-[0.85vw] leading-relaxed text-[#FFD300]/70 font-medium italic">
                                 {CAR_DATA[selectedCar].desc}
                             </p>
                         </div>
                     </div>
 
-                    {/* 下拉選單容器：需對應 useEffect 中的 id */}
+                    {/* 4. 下拉選單：移除 Extended Media 並優化顏色 */}
                     <div className="relative pt-10 border-t border-[#FFD300]/10" id="car-menu-container">
                         <p className="text-[0.65vw] tracking-[0.4em] opacity-40 mb-4 uppercase">Select Model</p>
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className={`w-full border-2 p-4 flex justify-between items-center transition-all duration-300 ${
-                                isOpen ? 'bg-[#FFD300] text-black border-[#FFD300]' : 'bg-black text-[#FFD300] border-[#FFD300]/30'
-                            }`}
+                            className={`w-full border-2 p-4 flex justify-between items-center transition-all ${isOpen ? 'bg-[#FFD300] text-black border-[#FFD300]' : 'bg-transparent text-[#FFD300] border-[#FFD300]/30'
+                                }`}
                         >
                             <span className="text-[1vw] tracking-wider font-bold">{selectedCar}</span>
-                            <span className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>▼</span>
+                            <span>{isOpen ? '▲' : '▼'}</span>
                         </button>
 
                         {isOpen && (
-                            <div className="absolute top-full left-0 w-full bg-black border border-[#FFD300]/30 mt-2 z-50 max-h-[40vh] overflow-y-auto custom-scrollbar shadow-2xl">
-                                {sortedCarNames.map((car, index) => {
-                                    const currentYear = CAR_DATA[car].year;
-                                    const prevYear = index > 0 ? CAR_DATA[sortedCarNames[index - 1]].year : null;
-                                    const showYearDivider = currentYear !== prevYear;
-
-                                    return (
-                                        <div key={car}>
-                                            {showYearDivider && (
-                                                <div className="bg-[#FFD300]/10 px-4 py-2 text-[0.6vw] tracking-[0.3em] text-[#FFD300] border-y border-[#FFD300]/10 font-bold uppercase">
-                                                    {currentYear} SERIES
-                                                </div>
-                                            )}
-                                            <div
-                                                onClick={() => { setSelectedCar(car); setIsOpen(false); }}
-                                                className="p-4 text-[0.9vw] text-[#FFD300] bg-black cursor-pointer hover:bg-[#FFD300] hover:text-black border-b border-[#FFD300]/10 last:border-0 transition-colors flex justify-between items-center group"
-                                            >
-                                                <span>{car}</span>
-                                                <div className="flex items-center gap-3">
-                                                    {ownedCars.includes(car) && <span className="text-[0.6vw] opacity-40 italic">OWNED</span>}
-                                                    <span className="text-[0.6vw] opacity-0 group-hover:opacity-100 transition-opacity font-bold uppercase">Select →</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                            <div className="absolute bottom-full left-0 w-full bg-[#0a0a0a] border border-[#FFD300]/30 mb-2 z-50 max-h-[35vh] overflow-y-auto custom-scrollbar shadow-2xl">
+                                {sortedCarNames.map((car) => (
+                                    <div
+                                        key={car}
+                                        onClick={() => { setSelectedCar(car); setIsOpen(false); }}
+                                        className="p-4 text-[0.9vw] text-[#FFD300]/50 hover:text-black hover:bg-[#FFD300] border-b border-white/5 last:border-0 cursor-pointer transition-all flex justify-between items-center group"
+                                    >
+                                        <span className="group-hover:translate-x-2 transition-transform">{car}</span>
+                                        <span className="text-[0.6vw] opacity-0 group-hover:opacity-100 font-bold uppercase">View →</span>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
-                </div>
-
-                <div className="mt-auto pt-10 border-t border-[#FFD300]/10">
-                    <a 
-                        href={`https://www.youtube.com/watch?v=${CAR_DATA[selectedCar].id}`} 
-                        target="_blank" 
-                        className="text-[0.7vw] border-b border-[#FFD300] pb-1 hover:text-white hover:border-white transition-all"
-                    >
-                        Extended media content →
-                    </a>
                 </div>
             </aside>
         </main>

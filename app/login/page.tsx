@@ -55,7 +55,7 @@ export default function LoginPage() {
 
             <div className="w-full max-w-[50vw] flex flex-col items-center text-black">
                 <h1 className="text-[5vw] leading-none mb-16 tracking-tighter whitespace-nowrap">
-                    {isLogin ? "Driver Login" : "Join the Scuderia"}
+                    {isLogin ? "User Login" : "Join the tifosi club"}
                 </h1>
 
                 <form onSubmit={handleAuth} className="space-y-16 relative w-[35vw]">
