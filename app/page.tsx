@@ -94,37 +94,54 @@ export default function Home() {
 
   return (
     <main className="flex h-screen w-screen bg-black overflow-hidden font-archivo italic font-black text-[#FFD300]">
-      {/* 左側 展示區 (72vw) */}
-      <div className="relative w-[72vw] h-full bg-black">
 
-        {/* --- 修正：登入狀態下的按鈕與登出連結 --- */}
-        <div className="absolute top-[4vh] right-[4vw] z-[100] flex flex-col items-end gap-2">
+      {/* --- Apple 風格頂部選單：換成黃色橫排 --- */}
+      <nav className="fixed top-0 left-0 w-full h-[6vh] z-[100] flex items-center justify-between px-[4vw] bg-[#FFD300] shadow-[0_4px_30px_rgba(0,0,0,0.1)] border-b border-black/5">
+
+        {/* 左側 Logo 區域：在黃底上改為黑色 */}
+        <div className="flex items-center gap-4">
+          <span className="text-[1.2vw] not-italic">🐎</span>
+          <span className="text-[0.7vw] tracking-[0.3em] uppercase font-black text-black">Maranello Legacy</span>
+        </div>
+
+        {/* 置中選單項目：文字改為黑色，增加點擊感 */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-[3vw]">
+          {['overview', 'history', 'models'].map((item) => (
+            <button
+              key={item}
+              className="text-[0.65vw] tracking-[0.2em] font-black text-black/60 hover:text-black transition-all lowercase italic"
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+
+        {/* 右側：登入 / Profile 狀態 */}
+        <div className="flex items-center gap-6">
           <Link href={session ? "/dashboard" : "/login"}>
-            <button className="px-8 py-3 bg-[#FFD300] text-black text-[0.8vw] font-black tracking-widest transition-all hover:bg-white hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,211,0,0.3)]">
-              {session ? "driver profile" : "login / join"}
+            <button className="text-[0.65vw] tracking-[0.15em] font-bold hover:text-white transition-colors lowercase">
+              {session ? "profile" : "login"}
             </button>
           </Link>
-
-          {/* 如果已登入，顯示小寫的登出按鈕 */}
           {session && (
             <button
               onClick={async () => {
                 await supabase.auth.signOut();
-                window.location.reload(); // 登出後重新整理頁面以更新狀態
+                window.location.reload();
               }}
-              className="text-[0.7vw] text-[#FFD300] opacity-60 hover:opacity-100 transition-all lowercase italic border-b border-[#FFD300]/30"
+              className="text-[0.65vw] px-3 py-1 border border-[#FFD300]/30 hover:bg-[#FFD300] hover:text-black transition-all lowercase"
             >
-              sign out →
+              sign out
             </button>
           )}
         </div>
+      </nav>
 
-        {/* 左上 Logo (保持不變) */}
-        <div className="absolute top-[4vh] left-[4vw] z-50">
-          <div className="w-[3.5vw] h-[5vw] bg-[#FFD300] flex items-center justify-center mb-1">
-            <span className="text-black text-[2.5vw] not-italic">🐎</span>
-          </div>
-          <span className="tracking-tighter leading-none text-[1.4vw] block">Tifosi club</span>
+      {/* 左側 展示區 (72vw) - 增加 pt-[6vh] 避免被導航欄遮擋 */}
+      <div className="relative w-[72vw] h-full bg-black pt-[6vh]">
+
+        {/* 左上 Logo (改為裝飾性小標) */}
+        <div className="absolute top-[4vh] left-[4vw] z-50 opacity-20 pointer-events-none">
         </div>
 
         {/* --- 3D 渲染區域 --- */}
@@ -137,15 +154,15 @@ export default function Home() {
           </Suspense>
         </Canvas>
 
-        {/* 頂部型號切換 */}
-        <div className="absolute top-[4vh] left-1/2 -translate-x-1/2 z-50 flex border border-[#FFD300]/30 bg-black/20 backdrop-blur-md">
+        {/* 型號切換按鈕 (Apple 風格：更細長簡潔) */}
+        <div className="absolute bottom-[4vh] left-1/2 -translate-x-1/2 z-50 flex rounded-full border border-[#FFD300]/20 bg-black/40 backdrop-blur-md p-1">
           {(['F40', 'F50'] as const).map((m) => (
             <button
               key={m}
               onClick={() => setCurrentModel(m)}
-              className={`px-12 py-3 text-[0.9vw] tracking-[0.2em] font-black transition-all ${currentModel === m
-                ? 'bg-[#FFD300] text-black' // 選中時：背景黃色，文字絕對黑色
-                : 'text-black hover:bg-[#FFD300]/20' // 未選中時：文字黃色
+              className={`px-8 py-2 rounded-full text-[0.7vw] tracking-[0.2em] font-black transition-all ${currentModel === m
+                ? 'bg-[#FFD300] text-black shadow-lg'
+                : 'text-[#FFD300]/60 hover:text-[#FFD300]'
                 }`}
             >
               {m}
